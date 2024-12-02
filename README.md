@@ -14,3 +14,4 @@ Then go to that folder and run the `main.go` solution
 ## Table of Contents
 
 - [`Day 01`](day01/main.go) | $\color{yellow}{**}$
+- [`Day 02`](day02/main.go) | $\color{yellow}{**}$
