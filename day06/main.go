@@ -23,57 +23,47 @@ func parseGrid(input []string) (map[Position]bool, Position) {
 	return grid, pos
 }
 
-func doesItLoop(grid map[Position]bool, added Position, start Position, results chan<- int) {
+func move(grid map[Position]bool, added Position, pos Position, part2 chan<- int) map[Position]struct{} {
 	type key struct{ p, d Position }
-	dir, pos := Position{0, -1}, start
-	seen := map[key]struct{}{}
+	dir := Position{0, -1}
+	locs, seen := map[Position]struct{}{}, map[key]bool{}
 	for {
-		seen[key{pos, dir}] = struct{}{}
-		newPos := Position{pos.x + dir.x, pos.y + dir.y}
-		wall, inGrid := grid[newPos]
-		if !inGrid {
-			results <- 0
-			return
+		if part2 == nil {
+			locs[pos] = struct{}{}
+		} else {
+			seen[key{pos, dir}] = true
 		}
-		if wall || newPos == added {
+		new := Position{pos.x + dir.x, pos.y + dir.y}
+		wall, valid := grid[new]
+		if !valid {
+			if part2 != nil {
+				part2 <- 0
+			}
+			return locs
+		}
+		if wall || new == added {
 			dir = Position{-dir.y, dir.x}
 		} else {
-			pos = newPos
+			pos = new
 		}
-		_, loop := seen[key{pos, dir}]
-		if loop {
-			results <- 1
-			return
+		if seen[key{pos, dir}] {
+			part2 <- 1
+			return locs
 		}
 	}
 }
 
 func solve(input []string) {
 	grid, start := parseGrid(input)
-	pos, inGrid, dir := start, true, Position{0, -1}
-	seen := map[Position]struct{}{}
-	for inGrid {
-		seen[pos] = struct{}{}
-		newPos, wall := Position{pos.x + dir.x, pos.y + dir.y}, false
-		wall, inGrid = grid[newPos]
-		if wall {
-			dir = Position{-dir.y, dir.x}
-		} else {
-			pos = newPos
-		}
-	}
+	seen := move(grid, Position{-1, -1}, start, nil)
 	fmt.Println("Part 1:", len(seen))
 
-	count, results := 0, make(chan int, len(seen))
+	count, part2 := 0, make(chan int, len(seen))
 	for try := range seen {
-		if try != start {
-			go doesItLoop(grid, try, start, results)
-		} else {
-			results <- 0
-		}
+		go move(grid, try, start, part2)
 	}
 	for i := 0; i < len(seen); i++ {
-		count += <-results
+		count += <-part2
 	}
 	fmt.Println("Part 2:", count)
 }
