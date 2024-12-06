@@ -40,7 +40,7 @@ func part1(input []string) {
 	fmt.Println("Part 1:", len(seen))
 }
 
-func doesItLoop(grid map[Position]bool, added Position, start Position) bool {
+func doesItLoop(grid map[Position]bool, added Position, start Position, results chan<- int) {
 	type key struct{ p, d Position }
 	dir, pos := Position{0, -1}, start
 	seen := map[key]struct{}{}
@@ -49,7 +49,8 @@ func doesItLoop(grid map[Position]bool, added Position, start Position) bool {
 		newPos := Position{pos.x + dir.x, pos.y + dir.y}
 		wall, valid := grid[newPos]
 		if !valid {
-			return false
+			results <- 0
+			return
 		}
 		if wall || (newPos.x == added.x && newPos.y == added.y) {
 			dir = Position{-dir.y, dir.x}
@@ -58,20 +59,25 @@ func doesItLoop(grid map[Position]bool, added Position, start Position) bool {
 		}
 		_, loop := seen[key{pos, dir}]
 		if loop {
-			return true
+			results <- 1
+			return
 		}
 	}
 }
 
 func part2(input []string) {
 	grid, pos := parseGrid(input)
-	count := 0
+	count, n := 0, len(grid)
+	results := make(chan int, n)
 	for try, wall := range grid {
 		if !(wall || (try.x == pos.x && try.y == pos.y)) {
-			if doesItLoop(grid, try, pos) {
-				count++
-			}
+			go doesItLoop(grid, try, pos, results)
+		} else {
+			results <- 0
 		}
+	}
+	for i := 0; i < n; i++ {
+		count += <-results
 	}
 	fmt.Println("Part 2:", count)
 }
