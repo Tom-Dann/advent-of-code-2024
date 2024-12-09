@@ -26,7 +26,11 @@ func TimeFunctionInput(function func([]string), input []string) {
 }
 
 func ReadInput(filename string, delim string) []string {
+	return strings.Split(ReadFile(filename), delim)
+}
+
+func ReadFile(filename string) string {
 	raw, err := os.ReadFile(filename)
 	Check(err)
-	return strings.Split(strings.TrimSpace(string(raw)), delim)
+	return strings.TrimSpace(string(raw))
 }
