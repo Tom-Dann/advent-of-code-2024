@@ -37,7 +37,7 @@ func part1() {
 }
 
 type Memory struct {
-	pos, size, id int
+	pos, size int
 }
 
 func part2() {
@@ -46,9 +46,9 @@ func part2() {
 	for i := range input { // Parse input
 		size := toInt(input[i])
 		if i%2 == 0 {
-			files = append(files, Memory{pos, size, i / 2})
+			files = append(files, Memory{pos, size})
 		} else {
-			free = append(free, Memory{pos, size, -1})
+			free = append(free, Memory{pos, size})
 		}
 		pos += size
 	}
@@ -59,16 +59,16 @@ func part2() {
 				break
 			}
 			if space.size >= file.size {
-				files[i] = Memory{space.pos, file.size, file.id}
-				free[j] = Memory{space.pos + file.size, space.size - file.size, space.id}
+				files[i] = Memory{space.pos, file.size}
+				free[j] = Memory{space.pos + file.size, space.size - file.size}
 				break
 			}
 		}
 	}
 	total := int64(0)
-	for _, file := range files { // Calculate checksum
-		for i := 0; i < file.size; i++ {
-			total += int64((file.pos + i) * file.id)
+	for i, file := range files { // Calculate checksum
+		for j := 0; j < file.size; j++ {
+			total += int64((file.pos + j) * i)
 		}
 	}
 	fmt.Println("Part 2:", total)
