@@ -11,7 +11,7 @@ func positiveMod(x, m int) int {
 
 const w, h = 101, 103
 
-func quadCount(lines []string, secs int) [4]int {
+func safetyFactor(lines []string, secs int) int {
 	quad := [4]int{}
 	for _, line := range lines {
 		var sx, sy, vx, vy int
@@ -21,28 +21,20 @@ func quadCount(lines []string, secs int) [4]int {
 			quad[x/(mx+1)+2*(y/(my+1))]++
 		}
 	}
-	return quad
+	return quad[0] * quad[1] * quad[2] * quad[3]
 }
 
-func part1(lines []string) {
-	quad := quadCount(lines, 100)
-	fmt.Println("Part 1:", quad[0]*quad[1]*quad[2]*quad[3])
-}
-
-func part2(lines []string) {
-	max, best := 0, 0
+func solve(lines []string) {
+	min, safest := safetyFactor(lines, 100), 100
+	fmt.Println("Part 1:", min)
 	for i := 0; i < w*h; i++ {
-		for _, n := range quadCount(lines, i) {
-			if n > max {
-				max, best = n, i
-			}
+		if score := safetyFactor(lines, i); score < min {
+			min, safest = score, i
 		}
 	}
-	fmt.Println("Part 2:", best)
+	fmt.Println("Part 2:", safest)
 }
 
 func main() {
-	input := utils.ReadInput("input.txt", "\n")
-	utils.TimeFunctionInput(part1, input)
-	utils.TimeFunctionInput(part2, input)
+	utils.TimeFunctionInput(solve, utils.ReadInput("input.txt", "\n"))
 }
