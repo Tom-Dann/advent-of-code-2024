@@ -7,25 +7,9 @@ import (
 )
 
 func solve(input []string) {
-	possible, towels := map[string]bool{}, map[string]bool{}
+	towels := map[string]bool{}
 	for _, towel := range strings.Split(input[0], ", ") {
-		possible[towel] = true
 		towels[towel] = true
-	}
-	var canMakePattern func(pattern string) bool
-	canMakePattern = func(pattern string) bool {
-		result, seen := possible[pattern]
-		if seen {
-			return result
-		}
-		for i := len(pattern) - 1; i > 0; i-- {
-			if possible[pattern[i:]] && canMakePattern(pattern[:i]) {
-				possible[pattern] = true
-				return true
-			}
-		}
-		possible[pattern] = false
-		return false
 	}
 
 	cache := map[string]int{}
@@ -50,9 +34,9 @@ func solve(input []string) {
 
 	part1, part2 := 0, 0
 	for _, pattern := range strings.Split(input[1], "\n") {
-		if canMakePattern(pattern) {
+		if count := combos(pattern); count > 0 {
 			part1++
-			part2 += combos(pattern)
+			part2 += count
 		}
 	}
 	fmt.Println("Part 1:", part1)
