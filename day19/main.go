@@ -12,7 +12,7 @@ func solve(input []string) {
 		towels[towel] = true
 	}
 
-	cache := map[string]int{}
+	cache := map[string]int{"": 1}
 	var combos func(pattern string) int
 	combos = func(pattern string) int {
 		result, seen := cache[pattern]
@@ -20,10 +20,7 @@ func solve(input []string) {
 			return result
 		}
 		count := 0
-		if towels[pattern] {
-			count++
-		}
-		for i := 0; i < len(pattern); i++ {
+		for i := 0; i <= len(pattern); i++ {
 			if towels[pattern[:i]] {
 				count += combos(pattern[i:])
 			}
