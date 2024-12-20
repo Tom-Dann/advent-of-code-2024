@@ -5,9 +5,7 @@ import (
 	"utils"
 )
 
-type Point struct {
-	x, y int
-}
+type Point struct{ x, y int }
 
 func getNeighbours(p Point) []Point {
 	return []Point{{p.x + 1, p.y}, {p.x, p.y + 1}, {p.x - 1, p.y}, {p.x, p.y - 1}}
@@ -22,22 +20,19 @@ func abs(x int) int {
 
 func solve(lines []string) {
 	grid := map[Point]rune{}
-	var start, end Point
+	var curr Point
 	for j, line := range lines { // Parse grid
 		for i, char := range line {
 			grid[Point{i, j}] = char
 			if char == 'S' {
-				start = Point{i, j}
-			} else if char == 'E' {
-				end = Point{i, j}
+				curr = Point{i, j}
 			}
 		}
 	}
 
-	positions := map[Point]int{start: 0}
-	path := map[Point]bool{start: true}
-	curr := start
-	for curr != end { // Find path from start (S) to end (E)
+	positions := map[Point]int{curr: 0}
+	path := map[Point]bool{curr: true}
+	for grid[curr] != 'E' { // Find path from start (S) to end (E)
 		for _, next := range getNeighbours(curr) {
 			if grid[next] != '#' && !path[next] {
 				path[next] = true
