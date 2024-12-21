@@ -31,71 +31,45 @@ var robotPad = map[rune]Point{
 }
 
 func getMoves(a, b, avoid Point) string {
-	moves := ""
+	var moves, xMove, yMove string
 	dx, dy := b.x-a.x, b.y-a.y
-	if a.x == avoid.x && b.y == avoid.y {
-		if dx < 0 {
-			moves += strings.Repeat("<", -dx)
-		}
-		if dx > 0 {
-			moves += strings.Repeat(">", dx)
-		}
-		if dy < 0 {
-			moves += strings.Repeat("^", -dy)
-		}
-		if dy > 0 {
-			moves += strings.Repeat("v", dy)
-		}
-	} else if a.y == avoid.y && b.x == avoid.x {
-		if dy < 0 {
-			moves += strings.Repeat("^", -dy)
-		}
-		if dy > 0 {
-			moves += strings.Repeat("v", dy)
-		}
-		if dx < 0 {
-			moves += strings.Repeat("<", -dx)
-		}
-		if dx > 0 {
-			moves += strings.Repeat(">", dx)
-		}
+	if dx >= 0 {
+		xMove = strings.Repeat(">", dx)
 	} else {
-		if dx < 0 {
-			moves += strings.Repeat("<", -dx)
-		}
-		if dy < 0 {
-			moves += strings.Repeat("^", -dy)
-		}
-		if dy > 0 {
-			moves += strings.Repeat("v", dy)
-		}
-		if dx > 0 {
-			moves += strings.Repeat(">", dx)
-		}
+		xMove = strings.Repeat("<", -dx)
+	}
+	if dy >= 0 {
+		yMove = strings.Repeat("v", dy)
+	} else {
+		yMove = strings.Repeat("^", -dy)
+	}
+	if (a.x == avoid.x && b.y == avoid.y) || (dx < 0 && !(a.y == avoid.y && b.x == avoid.x)) {
+		moves = xMove + yMove
+	} else {
+		moves = yMove + xMove
 	}
 	return moves + "A"
 }
 
 type State struct {
-	seq   string
-	level int
+	sequence string
+	level    int
 }
 
 var cache = map[State]int{}
 
-func getLength(seq string, level int) int {
-	key := State{seq, level}
-	result, seen := cache[key]
-	if seen {
+func getLength(sequence string, level int) int {
+	key := State{sequence, level}
+	if result, seen := cache[key]; seen {
 		return result
 	}
 	if level == 0 {
-		return len(seq)
+		return len(sequence)
 	}
-	length := 0
-	curr := 'A'
-	for _, next := range seq {
-		length += getLength(getMoves(robotPad[curr], robotPad[next], Point{0, 0}), level-1)
+	length, curr := 0, robotPad['A']
+	for _, button := range sequence {
+		next := robotPad[button]
+		length += getLength(getMoves(curr, next, Point{0, 0}), level-1)
 		curr = next
 	}
 	cache[key] = length
@@ -107,8 +81,7 @@ func solve(lines []string) {
 	for _, code := range lines {
 		var codeNum int
 		fmt.Sscanf(code, "%dA", &codeNum)
-		curr := keyPad['A']
-		sequence := ""
+		sequence, curr := "", keyPad['A']
 		for _, button := range code {
 			next := keyPad[button]
 			sequence += getMoves(curr, next, Point{0, 3})
